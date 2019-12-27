@@ -12,6 +12,13 @@ import {persistant, default as PersistantObject, setUniqueId_localStorage} from 
 import {myLog} from "../log/MyLog";
 
 
+@persistant('DemoProxy')
+class DemoProxy{
+    static _name = '小明';
+    static level = 99;
+    static time = new Date();
+}
+
 
 class DemoPO extends PersistantObject{
     abc = 'abc';
@@ -33,12 +40,16 @@ export default class NewClass extends cc.Component {
         /** 初始化唯一id */
         setUniqueId_localStorage('888');
 
+        myLog.dividingLine('静态变量持久化');
+
         /** 静态变量持久化 */
         myLog.log("read==>", NewClass.testNum);
-        myLog.dividingLine('write TEST_XXX');
         NewClass.testNum = 200;
+        myLog.dividingLine('write');
+        myLog.log("read==>", NewClass.testNum);
         myLog.warn('请检查TEST_XXX是否写入本地');
 
+        myLog.dividingLine('PO对象持久化');
 
         /** PO对象持久化 */
         const po = new DemoPO('DemoPO');
@@ -53,7 +64,16 @@ export default class NewClass extends cc.Component {
         myLog.dividingLine('writes');
         myLog.log('po==>', Object.assign({}, po));
 
-        /**  */
+        /** 静态对象持久化 */
+        myLog.dividingLine('静态对象持久化');
+        myLog.log('DemoProxy==>', Object.assign({}, DemoProxy));
+        DemoProxy._name = '张三丰';
+        DemoProxy.level = 999;
+        DemoProxy.time = new Date();
+        myLog.dividingLine('writes');
+        myLog.log('DemoProxy==>', Object.assign({}, DemoProxy));
+
+        myLog.todo('执行完毕后，再刷新一次，对比两次执行结果即可发现秘密!!');
     }
 
 }
