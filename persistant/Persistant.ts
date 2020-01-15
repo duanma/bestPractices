@@ -24,7 +24,7 @@ namespace LocalStorage{
 
     export function getNumber(key:string):number|null{
         const val = get(key);
-        if (val == undefined || val == null){
+        if (val == undefined || val == null || val == ''){
             return null;
         }
         return parseInt(val);
@@ -36,7 +36,7 @@ namespace LocalStorage{
 
     export function getBoolean(key:string):boolean|null{
         const val = getNumber(key);
-        if (val == undefined || val == null){
+        if (val == undefined || val == null || val == ''){
             return null;
         }
         return !!val;
@@ -53,7 +53,7 @@ namespace LocalStorage{
 
     export function getString(key:string):string|null{
         const val = get(key);
-        if (val == undefined || val == null){
+        if (val == undefined || val == null || val == ''){
             return null;
         }
         return val;
@@ -65,7 +65,7 @@ namespace LocalStorage{
 
     export function getObject(key:string):object|null{
         const val = get(key);
-        if (val == undefined || val == null){
+        if (val == undefined || val == null || val == ''){
             return null;
         }
         return JSON.parse(val);
@@ -80,26 +80,26 @@ namespace LocalStorage{
     export function read(key:string, type:string) {
         let t = undefined;
         if (type == 'number'){
-            t = LocalStorage.getNumber(key);
+            t = getNumber(key);
         }else if (type == 'string'){
-            t = LocalStorage.getString(key);
+            t = getString(key);
         }else if (type == 'boolean'){
-            t = LocalStorage.getBoolean(key);
+            t = getBoolean(key);
         }else if (type == 'object'){
-            t = LocalStorage.getObject(key);
+            t = getObject(key);
         }
         return t;
     }
 
     export function write(key:string, value:any) {
         if (typeof value == 'number'){
-            LocalStorage.setNumber(key, value);
+            setNumber(key, value);
         }else if (typeof value == 'string'){
-            LocalStorage.setString(key, value);
+            setString(key, value);
         }else if (typeof value == 'boolean'){
-            LocalStorage.setBoolean(key, value);
+            setBoolean(key, value);
         }else if (typeof value == 'object'){
-            LocalStorage.setObject(key, value);
+            setObject(key, value);
         }
     }
 }
@@ -114,7 +114,7 @@ export function persistant(key:string) {
                 /** 初始化静态数据 */
                 let lazyInit = false;
                 if (prop){
-                    const defaultValue = target[prop];
+                    let defaultValue = target[prop];
                     Object.defineProperty(target, prop, {
                         // value:target[prop],
                         // writable:true,
@@ -122,17 +122,16 @@ export function persistant(key:string) {
                         configurable:true,
                         get:function () {
                             if (!lazyInit){
-                                this.value = defaultValue;
                                 let data = LocalStorage.read(key, typeof defaultValue);
                                 if (data !== undefined && data !== null){
-                                    this.value = data;
+                                    defaultValue = data;
                                 }
                                 lazyInit = true;
                             }
-                            return this.value;
+                            return defaultValue;
                         },
                         set:function (value) {
-                            this.value = value;
+                            defaultValue = value;
                             LocalStorage.write(key, value);
                         }
                     });
@@ -216,7 +215,6 @@ export default class PersistantObject {
 
 /**
  * 总结：静态属性和静态类使用装饰器方式(自动化)，非静态对象使用继承PersistantObject方式(手动)
- * 示例：参考SettingsPO的两种实现方式
  */
 
 
